@@ -1,0 +1,16 @@
+{
+  "name": "playwright",
+  "version": "1.0.0",
+  "description": "- 👋 Hi there! Thanks for stopping by - 👀 I’m interested in Quality Assurance, Data Science, Computer Vision - 🌱 I’m currently learning Cypress, Git and Github - 💞️ I’m looking to collaborate on different projects",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0",
+    "checkly": "latest",
+    "jiti": "^2"
+  }
+}
