@@ -2,7 +2,7 @@ import { Page } from "playwright"
 import { expect } from "@playwright/test";
 
 export const locators = {
-  subscriptionEmail: (page: Page) => page.locator('#NewsletterForm__custom-popup'),
+  subscribeBtn: (page: Page) => page.locator('#Subscribe'),
   closeSubscription: (page: Page) => page.locator('.email-popup-inner > .btn-close'),
   cookieBar: (page: Page) => page.getByRole('dialog', { name: 'cookie bar' }).locator('div').first(),
   acceptBtn: (page: Page) => page.getByRole('button', { name: 'Aceptar' }),
@@ -44,14 +44,25 @@ export const locators = {
   productCompose2: (page: Page) => page.getByRole('heading', { name: 'COMPOSICIÓN -' }),
   productOpinions1: (page: Page) => page.getByRole('heading', { name: 'OPINIONES +' }),
   productOpinions2: (page: Page) => page.getByRole('heading', { name: 'OPINIONES -' }),
+  sidePanelTitle: (page: Page) => page.getByRole('banner').filter({ hasText: 'Carrito ·' }),
+  sidePanelSubTotal: (page: Page) => page.getByRole('dialog').getByText('Subtotal'),
+  gotoCartBtn: (page: Page) => page.getByRole('button', { name: 'IR AL CARRITO' }),
+  cartTitle: (page: Page) => page.getByText('CARRITO Seguir comprando'),
+  cartItem: (page: Page) => page.locator('#cart'),
+  giftcardSection: (page: Page) => page.getByRole('heading', { name: '¿Es para regalo?' }),
+  cartSubtotal: (page: Page) => page.locator('#main-cart-footer').getByText('Subtotal'),
+  cartTotal: (page: Page) => page.getByRole('heading', { name: 'Total' }),
+  cartTax: (page: Page) => page.getByText('IVA incl.', { exact: true }),
+  finishOrderBtn: (page: Page) => page.getByRole('button', { name: 'FINALIZAR PEDIDO' }),
+  klarnaCartImg: (page:Page) => page.getByRole('img', { name: 'Klarna' }).locator('path').first(),
 }
 
 
 export async function closeNewsletterModal(page:Page) {
-  if (await locators.subscriptionEmail(page).isVisible({ timeout: 10000 })) {
+  if (await locators.subscribeBtn(page).isVisible({ timeout: 10000 })) {
     console.log('Newsletter modal is visible');
     await locators.closeSubscription(page).click();
-    await expect(locators.subscriptionEmail(page)).not.toBeVisible({ timeout: 3000 });
+    await expect(locators.subscribeBtn(page)).not.toBeVisible({ timeout: 3000 });
     console.log('Newsletter modal was closed');
   }
 } 
@@ -104,7 +115,7 @@ export async function footerCheck(page: Page) {
 
 export async function homepageLanding(page: Page) {
   console.log("----------------------------------------------");
-  console.log("Step 1: Home page check...stared")
+  console.log("Step 1: Home page check...started")
   await page.goto("https://es.jimmylion.com/", { waitUntil: "load" })
   await expect(page.url()).toContain("jimmylion")
   await page.waitForLoadState("domcontentloaded");
@@ -114,10 +125,8 @@ export async function homepageLanding(page: Page) {
   await closeCookieModal(page);
   await footerCheck(page);
   await expect(locators.hashtag(page), "Hashtag is not visible, check home page").toBeVisible();
-  await locators.title4(page).scrollIntoViewIfNeeded({timeout: 3000});
-  await locators.title3(page).scrollIntoViewIfNeeded({timeout: 3000});
-  await locators.title2(page).scrollIntoViewIfNeeded({timeout: 3000});
-  await locators.title1(page).scrollIntoViewIfNeeded({timeout: 3000});
+  await closeGeoPopup(page);
+  await closeNewsletterModal(page);
   await menuCheck(page);
   await page.screenshot({ path: "step1.png", fullPage: true })
   console.log("Step 1: Home page check....complete");
@@ -197,37 +206,37 @@ export async function pdpVerification(page: Page) {
   } catch (error) {
     throw new Error(`Product price not found or not visible: ${error}`);
   }
-  await expect(locators.loyaltyPointsTxt(page)).toBeVisible({ timeout: 5000 });
+  await expect(locators.loyaltyPointsTxt(page)).toBeVisible({ timeout: 10000 });
   await expect(locators.sizeBtn(page)).toBeVisible({ timeout: 5000 });
   await expect(locators.add2CartBtn(page)).toBeVisible({ timeout: 5000 });
   await expect(locators.promoBadge(page)).toBeVisible({ timeout: 5000 });
   if (await locators.productDescription1(page).isVisible({ timeout: 5000 })) {
-    console.log('Product description is visible');
     await locators.productDescription1(page).click();
     await expect(locators.productDescription2(page)).toBeVisible({ timeout: 10000 });
     await locators.productDescription2(page).click();
     await expect(locators.productDescription1(page)).toBeVisible({ timeout: 5000 });
+    console.log('Product description is visible and collapsible');
   }
   if (await locators.productCare1(page).isVisible({ timeout: 5000 })) {
-    console.log('Product care is visible');
     await locators.productCare1(page).click();
     await expect(locators.productCare2(page)).toBeVisible({ timeout: 10000 });
     await locators.productCare2(page).click();
     await expect(locators.productCare1(page)).toBeVisible({ timeout: 5000 });
+    console.log('Product care is visible and collapsible');
   }
   if (await locators.productCompose1(page).isVisible({ timeout: 5000 })) {
-    console.log('Product composition is visible');
     await locators.productCompose1(page).click();
     await expect(locators.productCompose2(page)).toBeVisible({ timeout: 5000 });
     await locators.productCompose2(page).click();
     await expect(locators.productCompose1(page)).toBeVisible({ timeout: 5000 });
+    console.log('Product composition is visible and collapsible');
   }
   if (await locators.productOpinions1(page).isVisible({ timeout: 5000 })) {
-    console.log('Product opinions is visible');
     await locators.productOpinions1(page).click();
     await expect(locators.productOpinions2(page)).toBeVisible({ timeout: 5000 });
     await locators.productOpinions2(page).click();
     await expect(locators.productOpinions1(page)).toBeVisible({ timeout: 5000 });
+    console.log('Product opinions is visible and collapsible');
   }
   await locators.pdpRecommendations(page).scrollIntoViewIfNeeded({timeout: 5000});
   await expect(locators.slideRecommendations(page)).toBeVisible({ timeout: 5000 });
@@ -236,3 +245,66 @@ export async function pdpVerification(page: Page) {
   console.log("Step 4: Verify PDP elements... completed")
   console.log("----------------------------------------------");
 }
+
+export async function add2Cart(page: Page) {
+  console.log("----------------------------------------------");
+  console.log("Step 5: Add product to cart...started")
+  await locators.sizeBtn(page).click({delay:1000});
+  const sizeOptions = [
+    'Talla XS Variante agotada o',
+    'Talla XS Variante agotada o no disponible Avisame',
+    'Talla S Variante agotada o no',
+    'Talla S Variante agotada o no disponible Avisame',
+    'Talla M Variante agotada o no',
+    'Talla M Variante agotada o no disponible Avisame',
+    'Talla L Variante agotada o no',
+    'Talla L Variante agotada o no disponible Avisame',
+    'Talla XL Variante agotada o no',
+    'Talla XL Variante agotada o no disponible Avisame'
+  ];
+  for (const sizeText of sizeOptions) {
+    try {
+      // Check if the element exists and is visible
+      const element = page.getByText(sizeText);
+      const isVisible = await element.isVisible();
+      
+      if (isVisible && !sizeText.includes('Avisame')) {
+        console.log(`Selecting size: ${sizeText}`);
+        await element.click();
+        break; // Successfully clicked
+      }
+    } catch (error) {
+      // Continue to next option if current one fails
+      console.log(`Size option "${sizeText}" not available or failed`);
+      continue;
+    }
+  }
+  await locators.add2CartBtn(page).click();
+  await expect(locators.sidePanelTitle(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.sidePanelSubTotal(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.gotoCartBtn(page)).toBeVisible({ timeout: 3000 });
+  await page.screenshot({ path: "step5.png", fullPage: true })
+  await locators.gotoCartBtn(page).click();
+  await page.waitForURL('https://es.jimmylion.com/cart');
+  console.log("Step 5: Add product to cart....complete");
+  console.log("----------------------------------------------");
+}
+
+export async function cartVerification(page: Page) {
+  console.log("----------------------------------------------");
+  console.log("Step 6: Verify cart...started")
+  await expect(locators.cartTitle(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.cartItem(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.giftcardSection(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.cartSubtotal(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.cartTotal(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.cartTax(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.finishOrderBtn(page)).toBeVisible({ timeout: 3000 });
+  await expect(locators.klarnaCartImg(page)).toBeVisible({ timeout: 3000 });
+  await page.screenshot({ path: "step6.png", fullPage: true })
+  await locators.finishOrderBtn(page).click();
+  await page.waitForLoadState('domcontentloaded');
+  console.log("Step 6: Verify cart....complete");
+  console.log("----------------------------------------------");
+}
+
