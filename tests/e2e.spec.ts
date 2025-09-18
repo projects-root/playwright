@@ -11,6 +11,7 @@ test.describe('Automation E2E - Jimmy Lion', () => {
     await jimmyLion.plpVerification(page);
     await jimmyLion.goToPDP(page);
     await jimmyLion.pdpVerification(page);
-    
+    await jimmyLion.add2Cart(page);
+    await jimmyLion.cartVerification(page);
   })
 })
